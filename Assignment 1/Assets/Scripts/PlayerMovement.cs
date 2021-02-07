@@ -4,33 +4,43 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField]
-    float moveSpeed = 5f;
-    Rigidbody2D rb;
+    float moveSpeed = 0f;
+    public float runSpeed = 40f;
+    public Animator animator;
+
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        //keeps value absolute / positive to track animation transition
+        animator.SetFloat("Speed", Mathf.Abs(moveSpeed));
+        //calculating moveSpeed variable
+        moveSpeed = Input.GetAxisRaw("Horizontal") * runSpeed;
+        //adds vertical force (y-axis) the instant the jump key is pressed down
+        if (Input.GetButtonDown("Jump"))
+        {
+            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 7f), ForceMode2D.Impulse);
+        }
     }
 
     void FixedUpdate()
     {
-        Jump();
-        Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), 0f);
-        transform.position += movement * Time.deltaTime * moveSpeed;
+        //moves character
+        Vector3 movement = new Vector3(Input.GetAxis("Horizontal") * runSpeed, 0f);
+        transform.position += movement * Time.fixedDeltaTime * runSpeed;
     }
 
-    void Jump()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (Input.GetButtonDown("Jump")) {
-            gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 5f), ForceMode2D.Impulse);
-        }
-        
+        //destroys a cherry if collision occurs
+        if (collision.gameObject.CompareTag("Cherry"))
+        {
+            Destroy(collision.gameObject);
+        } 
     }
 }
